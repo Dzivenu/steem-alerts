@@ -1,3 +1,8 @@
+# ZachC16/@zcgolf16
+# Simple STEEM price text alerts
+# Version 1.0
+# June 5, 2017
+
 from email.mime.text import MIMEText
 import smtplib
 from urllib.request import *
@@ -134,7 +139,6 @@ def alertRun():
                 print("Sent.")
                 send.quit()
                 alertTrigger = False
-
 
 
 
