@@ -1,7 +1,7 @@
 # ZachC16/@zcgolf16
 # Simple STEEM price text alerts
-# Version 1.1
-# June 6, 2017
+# Version 1.2
+# June 8, 2017
 
 from email.mime.text import MIMEText
 import smtplib
@@ -11,9 +11,15 @@ import time
 
 def alertRun():
     # Setup
-    print("\n\n----------------Currency Pair List----------------\n1 - USD/STEEM\n2 - BTC/STEEM\n")
+    print("Starting up... NOTE: Start-up involves calling APIs, so be patient!")
+    USD = USDToSTEEMAPICall()
+    BTC = BTCToSTEEMAPICall()
+    GBP = GBPToSTEEMAPICall()
+    EUR = EURToSTEEMAPICall()
+    clear()
+    print("\n\n----------------Currency Pair List----------------\n\n1 - USD/STEEM ($"+str(USD)+")\n2 - BTC/STEEM ("+str(BTC)+" BTC)\n3 - GBP/STEEM (£"+str(GBP)+")\n4 - EUR/STEEM (€"+str(EUR)+")")
     alertCurrencyPair = int(input("Enter the number corresponding to the currency pair you wish to be alerted about:"))
-    while alertCurrencyPair != 1 and alertCurrencyPair != 2:
+    while alertCurrencyPair != 1 and alertCurrencyPair != 2 and alertCurrencyPair != 3 and alertCurrencyPair != 4:
         print("You entered an invalid number. Please try again.")
         alertCurrencyPair = int(input("Enter the number corresponding to the currency pair you wish to be alerted about:"))
     alert = float(input("What price of STEEM would you like to be alerted at (NOTE: Only enter a float number. Do not enter any symbols or letters: "))
@@ -25,7 +31,7 @@ def alertRun():
     while len(phonenumber) != 10:
         print("The number entered is invalid. Please try again.")
         phonenumber = str(input("What is your phone number?: "))
-    print("\n\n----------------Carrier List----------------\n\n1 - AT&T\n2 - Cricket\n3 - MetroPCS\n4 - Sprint\n5 - T-Mobile\n6 - Verzion Wireless\nAny Other Number - Other")
+    print("\n\n----------------Carrier List----------------\n\n1 - AT&T\n2 - Cricket\n3 - MetroPCS\n4 - Sprint\n5 - T-Mobile (U.S.)\n6 - Verzion Wireless\nAny Other Number - Other")
     txtgateway = (int(input("Enter the number corresponding to your cell carrier from the list above: ")))
     if txtgateway == 1:
         txtgateway = "@txt.att.net"
@@ -41,7 +47,7 @@ def alertRun():
         print("Sprint selected.\n")
     elif txtgateway == 5:
         txtgateway = "@tmomail.net"
-        print("T-Mobile selected.\n")
+        print("T-Mobile (U.S.) selected.\n")
     elif txtgateway == 6:
         txtgateway = "@vtext.com"
         print("Verzion selected.\n")
@@ -54,80 +60,53 @@ def alertRun():
     # USD/STEEM alerts
     if alertCurrencyPair == 1:
         priceAtTimeOfAlert = USDToSTEEMAPICall()
-        print(priceAtTimeOfAlert)
-        if alert > priceAtTimeOfAlert:
-            while alertTrigger == True:
-                STEEMPriceUSD = USDToSTEEMAPICall()
-
-                if alert <= STEEMPriceUSD:
-                    msg = MIMEText("STEEM's price has hit/risen above $"+str(alert)+"!")
-                    msg['Subject'] = "STEEM price alert from steem-alerts!"
-                    msg['From'] = smtplogin
-                    msg['To'] = phonenumber+txtgateway
-                    send = smtplib.SMTP_SSL(smtpserver)
-                    send.login(smtplogin, smtppassword)
-                    send.sendmail(msg['From'], [msg['To']], msg.as_string())
-                    print("Sent.")
-                    send.quit()
-                    alertTrigger = False
-
-
-        elif alert < priceAtTimeOfAlert:
-            while alertTrigger == True:
-                STEEMPriceUSD = USDToSTEEMAPICall()
-
-                if alert >= STEEMPriceUSD:
-                    msg = MIMEText("STEEM's price has hit/dropped below $"+str(alert)+"!")
-                    msg['Subject'] = "STEEM price alert from steem-alerts!"
-                    msg['From'] = smtplogin
-                    msg['To'] = phonenumber+txtgateway
-                    send = smtplib.SMTP_SSL(smtpserver)
-                    send.login(smtplogin, smtppassword)
-                    send.sendmail(msg['From'], [msg['To']], msg.as_string())
-                    print("Sent.")
-                    send.quit()
-                    alertTrigger = False
-
-    # BTC/STEEM alerts
     elif alertCurrencyPair == 2:
         priceAtTimeOfAlert = BTCToSTEEMAPICall()
-        print(priceAtTimeOfAlert)
-        if alert > priceAtTimeOfAlert:
-            while alertTrigger == True:
-                STEEMPrice = BTCToSTEEMAPICall()
-                time.sleep(2)
+    elif alertCurrencyPair == 3:
+        priceAtTimeOfAlert = GBPToSTEEMAPICall()
+    elif alertCurrencyPair == 4:
+        priceAtTimeOfAlert = EURToSTEEMAPICall()
+    print(priceAtTimeOfAlert)
+    if alert > priceAtTimeOfAlert:
+        while alertTrigger == True:
+            if alertCurrencyPair == 1:
+                currentPrice = USDToSTEEMAPICall()
+                currency = "$"
+            elif alertCurrencyPair == 2:
+                currentPrice = BTCToSTEEMAPICall()
+                currency = " BTC"
+            elif alertCurrencyPair == 3:
+                currentPrice = GBPToSTEEMAPICall()
+                currency = " GBP"
+            elif alertCurrencyPair == 4:
+                currentPrice = EURToSTEEMAPICall()
+                currency = " EURO"
+            time.sleep(2)
 
-                if alert <= STEEMPrice:
-                    msg = MIMEText("STEEM's price has hit/risen above "+str(alert)+" BTC!")
-                    msg['Subject'] = "STEEM price alert from steem-alerts!"
-                    msg['From'] = smtplogin
-                    msg['To'] = phonenumber+txtgateway
-                    send = smtplib.SMTP_SSL(smtpserver)
-                    send.login(smtplogin, smtppassword)
-                    send.sendmail(msg['From'], [msg['To']], msg.as_string())
-                    print("Sent.")
-                    send.quit()
-                    alertTrigger = False
-
-
-        elif alert < priceAtTimeOfAlert:
-            while alertTrigger == True:
-                STEEMPrice = BTCToSTEEMAPICall()
-                time.sleep(2)
-
-                if alert >= STEEMPrice:
-                    msg = MIMEText("STEEM's price has hit/dropped below "+str(alert)+" BTC!")
-                    msg['Subject'] = "STEEM price alert from steem-alerts!"
-                    msg['From'] = smtplogin
-                    msg['To'] = phonenumber+txtgateway
-                    send = smtplib.SMTP_SSL(smtpserver)
-                    send.login(smtplogin, smtppassword)
-                    send.sendmail(msg['From'], [msg['To']], msg.as_string())
-                    print("Sent.")
-                    send.quit()
-                    alertTrigger = False
+            if alert <= currentPrice:
+                sendMessage(smtplogin, smtppassword, phonenumber, txtgateway, smtpserver, "hit/risen above", alert, currency)
+                alertTrigger = False
 
 
+    elif alert < priceAtTimeOfAlert:
+        while alertTrigger == True:
+            if alertCurrencyPair == 1:
+                currentPrice = USDToSTEEMAPICall()
+                currency = "$"
+            elif alertCurrencyPair == 2:
+                currentPrice = BTCToSTEEMAPICall()
+                currency = " BTC"
+            elif alertCurrencyPair == 3:
+                currentPrice = GBPToSTEEMAPICall()
+                currency = " GBP"
+            elif alertCurrencyPair == 4:
+                currentPrice = EURToSTEEMAPICall()
+                currency = " EURO"
+            time.sleep(2)
+
+            if alert >= currentPrice:
+                sendMessage(smtplogin, smtppassword, phonenumber, txtgateway, smtpserver, "hit/dropped below", alert, currency)
+                alertTrigger = False
 
 # BTC/STEEM price API call
 def BTCToSTEEMAPICall():
@@ -166,6 +145,65 @@ def USDToSTEEMAPICall():
     print(STEEMPriceUSD)
 
     return STEEMPriceUSD
+
+
+# GBP/STEEM price API call
+def GBPToSTEEMAPICall():
+    BTCPriceGBP = 0
+    STEEMPrice = BTCToSTEEMAPICall()
+    while BTCPriceGBP == 0:
+        try:
+            response = urlopen("http://api.coindesk.com/v1/bpi/currentprice.json")
+            BTCPrice = response.read()
+            BTCPrice = BTCPrice.decode("utf-8")
+            BTCPrice = ast.literal_eval(BTCPrice)
+            BTCPriceGBP = BTCPrice['bpi']['GBP']['rate'].replace(',','')
+            BTCPriceGBP = float(BTCPriceGBP)
+        except:
+            print("Connection error.")
+
+    STEEMPriceGBP = BTCPriceGBP*STEEMPrice
+    print(STEEMPriceGBP)
+
+    return STEEMPriceGBP
+
+
+# EUR/STEEM price API call
+def EURToSTEEMAPICall():
+    BTCPriceEUR = 0
+    STEEMPrice = BTCToSTEEMAPICall()
+    while BTCPriceEUR == 0:
+        try:
+            response = urlopen("http://api.coindesk.com/v1/bpi/currentprice.json")
+            BTCPrice = response.read()
+            BTCPrice = BTCPrice.decode("utf-8")
+            BTCPrice = ast.literal_eval(BTCPrice)
+            BTCPriceEUR = BTCPrice['bpi']['EUR']['rate'].replace(',','')
+            BTCPriceEUR = float(BTCPriceEUR)
+        except:
+            print("Connection error.")
+
+    STEEMPriceEUR = BTCPriceEUR*STEEMPrice
+    print(STEEMPriceEUR)
+
+    return STEEMPriceEUR
+
+
+def sendMessage(smtplogin, smtppassword, phonenumber, txtgateway, smtpserver, updown, alert, currency):
+    msg = MIMEText("STEEM's price has "+str(updown)+" "+str(alert)+str(currency)+"!")
+    print("STEEM's price has "+str(updown)+" "+str(alert)+str(currency)+"!")
+    msg['Subject'] = "STEEM price alert from steem-alerts!"
+    msg['From'] = smtplogin
+    msg['To'] = phonenumber+txtgateway
+    send = smtplib.SMTP_SSL(smtpserver)
+    send.login(smtplogin, smtppassword)
+    send.sendmail(msg['From'], [msg['To']], msg.as_string())
+    print("Sent.")
+    send.quit()
+
+
+def clear():
+    print("\n"*120)
 
 
 
